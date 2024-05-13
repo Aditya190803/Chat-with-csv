@@ -30,8 +30,7 @@ uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 if uploaded_file is not None:
     df = load_data(uploaded_file)
 
-    with st.expander("🔎 Dataframe Preview"):
-        st.write(df.tail(3))
+    st.write(df)
 
     query = st.text_area("🗣️ Chat with Dataframe")
     container = st.container()
