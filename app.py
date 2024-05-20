@@ -5,7 +5,7 @@ from pandasai import SmartDataframe
 from langchain_groq.chat_models import ChatGroq
 from pandasai.responses.response_parser import ResponseParser
 
-llm = ChatGroq(model_name="llama3-70b-8192",api_key = os.environ["GROQ_API_KEY"])
+llm = ChatGroq(model_name="llama3-70b-8192", api_key=os.environ["GROQ_API_KEY"])
 
 def load_data(uploaded_file) -> pd.DataFrame:
     if uploaded_file is not None:
@@ -29,7 +29,6 @@ uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 
 if uploaded_file is not None:
     df = load_data(uploaded_file)
-
     st.write(df)
 
     query = st.text_area("🗣️ Chat with Dataframe")
@@ -37,14 +36,12 @@ if uploaded_file is not None:
 
     if query:
         if st.button("Generate"):
-            if prompt:
-                with st.spinner("Generating response..."):
-                    query_engine = SmartDataframe(df,config={"llm": llm,"response_parser": StreamlitResponse,})
-                    answer = query_engine.chat(query)
-                    st.write(answer)
+            with st.spinner("Generating response..."):
+                query_engine = SmartDataframe(df, config={"llm": llm, "response_parser": StreamlitResponse})
+                answer = query_engine.chat(query)
+                st.write(answer)
         else:
-            if prompt:
-                with st.spinner("Generating response..."):
-                    query_engine = SmartDataframe(df,config={"llm": llm,"response_parser": StreamlitResponse,})
-                    answer = query_engine.chat(query)
-                    st.write(answer)
+            with st.spinner("Generating response..."):
+                query_engine = SmartDataframe(df, config={"llm": llm, "response_parser": StreamlitResponse})
+                answer = query_engine.chat(query)
+                st.write(answer)
