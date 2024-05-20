@@ -36,13 +36,15 @@ if uploaded_file is not None:
     container = st.container()
 
     if query:
-        
-        query_engine = SmartDataframe(
-            df,
-            config={
-                "llm": llm,
-                "response_parser": StreamlitResponse,
-            },
-        )
-
-        answer = query_engine.chat(query)
+        if st.button("Generate"):
+        if prompt:
+            with st.spinner("Generating response..."):
+                query_engine = SmartDataframe(df,config={"llm": llm,"response_parser": StreamlitResponse,})
+                answer = query_engine.chat(query)
+                st.write(answer)
+        else:
+            if prompt:
+                with st.spinner("Generating response..."):
+                    query_engine = SmartDataframe(df,config={"llm": llm,"response_parser": StreamlitResponse,})
+                     answer = query_engine.chat(query)
+                    st.write(answer)
