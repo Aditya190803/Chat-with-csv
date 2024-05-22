@@ -1,4 +1,6 @@
 pandas 
 pandasai
+matplotlib
+seaborn
 streamlit
 langchain-groq
