@@ -6,7 +6,7 @@ from langchain_groq.chat_models import ChatGroq
 from pandasai.responses.response_parser import ResponseParser
 
 # Initialize the language model
-llm = ChatGroq(model_name="meta-llama/llama-4-scout-17b-16e-instruct", api_key=os.environ["GROQ_API_KEY"])
+llm = ChatGroq(model_name="deepseek-r1-distill-llama-70b", api_key=os.environ["GROQ_API_KEY"])
 
 def load_data(uploaded_file) -> pd.DataFrame:
     if uploaded_file is not None:
