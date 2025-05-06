@@ -1,64 +1,56 @@
-import pandas as pd
-import os
+from langchain_google_genai import GoogleGenerativeAI
 import streamlit as st
+import pandas as pd
 from pandasai import SmartDataframe
-from langchain_groq.chat_models import ChatGroq
 from pandasai.responses.response_parser import ResponseParser
 
-# Initialize the language model
-llm = ChatGroq(model_name="deepseek-r1-distill-llama-70b", api_key=os.environ["GROQ_API_KEY"])
-
-def load_data(uploaded_file) -> pd.DataFrame:
-    if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
-        return data
-    return None
-
+# Custom response parser to display outputs in Streamlit
 class StreamlitResponse(ResponseParser):
+    def __init__(self, context):
+        super().__init__(context)  # Pass context to the parent class
+
     def format_dataframe(self, result):
         st.dataframe(result["value"])
 
     def format_plot(self, result):
-        st.image(result["value"])
+        st.image(result["value"])  # Display plot image
 
     def format_other(self, result):
         st.write(result["value"])
 
-# Streamlit app title
-st.write("# Chat with CSV Data 🦙")
+# Initialize the model
+try:
+    model = GoogleGenerativeAI(api_key=st.secrets["GOOGLE_API_KEY"], model="gemini-pro")
+    st.success("Model loaded successfully.")
+except Exception as e:
+    st.error(f"Failed to load model: {e}")
 
-# File uploader for CSV
-uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
+st.title("Data Analysis with PandaAI")
 
-# Create a container for chat history
-if "history" not in st.session_state:
-    st.session_state.history = []
+uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    df = load_data(uploaded_file)
-    st.write(df)
+    data = pd.read_csv(uploaded_file)
+    st.write("### Preview of Data", data.head(3))
 
-    # Form to capture user input and submit
-    query = st.text_input("🗣️ Ask your question:")
+    try:
+        df = SmartDataframe(data, config={
+            "llm": model,
+            "response_parser": StreamlitResponse,  # Pass the class, not an instance
+            "enforce_privacy": False
+        })
+        st.success("SmartDataframe initialized.")
+    except Exception as e:
+        st.error(f"Failed to initialize SmartDataframe: {e}")
 
-    # Process the query when the user submits
-    if query:
-        # Add user query to the chat history
-        st.session_state.history.append({"user": query})
+    prompt = st.text_area("🔎 Enter your prompt:")
 
-        with st.spinner("Generating response..."):
-            query_engine = SmartDataframe(df, config={"llm": llm, "response_parser": StreamlitResponse})
-            answer = query_engine.chat(query)
-
-            # Add bot response to the chat history
-            st.session_state.history.append({"bot": answer})
-
-        # Display the chat history
-        for message in st.session_state.history:
-            if "user" in message:
-                st.markdown(f"**You:** {message['user']}")
-            if "bot" in message:
-                st.markdown(f"**Bot:** {message['bot']}")
-
-        # Clear the text input after processing the query
-        st.text_input("🗣️ Ask your question:", value="", key="query_input", disabled=False)
+    if st.button("Generate"):
+        if prompt:
+            with st.spinner("Generating response..."):
+                try:
+                    response = df.chat(prompt)
+                    if response:  # Handles non-plotted plain text or structured responses
+                        st.write(response)
+                except Exception as e:
+                    st.error(f"Error during generation: {e}")
