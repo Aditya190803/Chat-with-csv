@@ -20,7 +20,7 @@ class StreamlitResponse(ResponseParser):
 
 # Initialize the model
 try:
-    model = GoogleGenerativeAI(api_key=st.secrets["GOOGLE_API_KEY"], model="gemini-pro")
+    model = GoogleGenerativeAI(api_key=st.secrets["GOOGLE_API_KEY"], model="gemini-2.0-flash")
     st.success("Model loaded successfully.")
 except Exception as e:
     st.error(f"Failed to load model: {e}")
